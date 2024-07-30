@@ -1,4 +1,4 @@
-3. Linking the associated name with the highest weighted average scores using a unique ID 
+# linking the associated name with the highest weighted average scores using a unique ID 
 
 import pandas as pd
 
