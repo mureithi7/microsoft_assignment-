@@ -1,0 +1,35 @@
+2. Determine movie with the best rating by calculating weighted average scores:
+
+import pandas as pd
+
+# File path to the ratings data
+file_path = 'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\imdb.title.ratings.csv.gz'
+
+# Read the ratings DataFrame
+ratings_df = pd.read_csv(file_path)
+
+# Check for necessary columns
+if 'averagerating' in ratings_df.columns and 'numvotes' in ratings_df.columns:
+    # Calculate C: the mean rating across all movies
+    C = ratings_df['averagerating'].mean()
+    
+    # Calculate m: the minimum votes required (e.g., the 80th percentile)
+    m = ratings_df['numvotes'].quantile(0.80)
+    
+    # Filter movies that qualify based on m
+    qualified_movies = ratings_df[ratings_df['numvotes'] >= m]
+    
+    # Calculate Weighted Rating (WR) using the IMDB formula
+    qualified_movies['weighted_rating'] = (
+        (qualified_movies['numvotes'] * qualified_movies['averagerating']) + (m * C)
+    ) / (qualified_movies['numvotes'] + m)
+    
+    # Sort movies by weighted rating
+    best_movies = qualified_movies.sort_values('weighted_rating', ascending=False)
+    
+    # Display the top 10 movies
+    print("Top 10 Movies by Weighted Rating:")
+    print(best_movies[['tconst', 'averagerating', 'numvotes', 'weighted_rating']].head(10))
+else:
+    print("Required columns ('averagerating', 'numvotes') not found in the DataFrame.")
+

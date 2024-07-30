@@ -1,0 +1,42 @@
+1. Determine the movie with the highest revenue: 
+
+import pandas as pd
+
+# List of file paths
+file_paths = [
+    'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\bom.movie_gross.csv.gz', 
+    'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\imdb.name.basics.csv.gz', 
+    'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\imdb.title.ratings.csv.gz'
+]
+
+# List to store DataFrames
+dataframes = []
+
+# Loop through the file paths and read each file
+for file in file_paths:
+    df = pd.read_csv(file)
+    dataframes.append(df)
+
+# Identify the DataFrame corresponding to 'bom.movie_gross.csv.gz'
+# Assuming it's the first DataFrame in the list
+movie_gross_df = dataframes[0]  # Index 0 corresponds to the first DataFrame
+
+# Ensure the necessary columns are present
+if 'domestic_gross' in movie_gross_df.columns and 'foreign_gross' in movie_gross_df.columns:
+    # Convert gross columns to numeric, forcing non-numeric to NaN, and fill NaN with 0
+    movie_gross_df['domestic_gross'] = pd.to_numeric(movie_gross_df['domestic_gross'], errors='coerce').fillna(0)
+    movie_gross_df['foreign_gross'] = pd.to_numeric(movie_gross_df['foreign_gross'], errors='coerce').fillna(0)
+
+    # Calculate total gross revenue
+    movie_gross_df['total_gross'] = movie_gross_df['domestic_gross'] + movie_gross_df['foreign_gross']
+    
+    # Find the movie with the highest total gross revenue
+    best_selling_movie = movie_gross_df.loc[movie_gross_df['total_gross'].idxmax()]
+    
+    # Display the movie with the highest total gross revenue
+    print("Movie with the highest total gross revenue:")
+    print(best_selling_movie[['title', 'domestic_gross', 'foreign_gross', 'total_gross']])
+else:
+    print("Required columns ('domestic_gross', 'foreign_gross') not found in the DataFrame.")
+
+

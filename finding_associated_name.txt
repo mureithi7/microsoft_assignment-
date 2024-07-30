@@ -1,0 +1,71 @@
+3. Linking the associated name with the highest weighted average scores using a unique ID 
+
+import pandas as pd
+
+# File paths
+ratings_file_path = 'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\imdb.title.ratings.csv.gz'
+names_file_path = 'c:\\Users\\ADMIN\\Desktop\\Moringa files\\csv\\imdb.name.basics.csv.gz'
+
+# Read the ratings DataFrame
+ratings_df = pd.read_csv(ratings_file_path)
+
+# Calculate mean rating and minimum votes
+C = ratings_df['averagerating'].mean()
+m = ratings_df['numvotes'].quantile(0.80)
+
+# Filter movies that qualify based on minimum votes
+qualified_movies = ratings_df[ratings_df['numvotes'] >= m]
+
+# Calculate Weighted Rating (WR) using the IMDB formula
+qualified_movies['weighted_rating'] = (
+    (qualified_movies['numvotes'] * qualified_movies['averagerating']) + (m * C)
+) / (qualified_movies['numvotes'] + m)
+
+# Sort movies by weighted rating
+best_movies = qualified_movies.sort_values('weighted_rating', ascending=False).head(10)
+
+# Display the top 10 movies
+print("Top 10 Movies by Weighted Rating:")
+print(best_movies[['tconst', 'averagerating', 'numvotes', 'weighted_rating']])
+
+# Extract tconst identifiers of top 10 movies
+top_movie_ids = best_movies['tconst'].tolist()
+
+# Read the names DataFrame
+names_df = pd.read_csv(names_file_path)
+
+# Handle empty cells in 'known_for_titles'
+names_df['known_for_titles'] = names_df['known_for_titles'].fillna('')  # Replace NaNs with empty strings
+names_df['known_for_titles'] = names_df['known_for_titles'].apply(lambda x: x.split(',') if x else [])
+
+# Explode 'known_for_titles' column into separate rows
+names_exploded = names_df.explode('known_for_titles')
+
+# Filter out rows where 'known_for_titles' is empty
+names_exploded = names_exploded[names_exploded['known_for_titles'] != '']
+
+# Filter names that are associated with the top movie IDs
+associated_names = names_exploded[names_exploded['known_for_titles'].isin(top_movie_ids)]
+
+# Display the primary names and their associated top movies
+print("\nPrimary Names Associated with Top 10 Movies:")
+associated_names_list = associated_names[['primary_name', 'known_for_titles']]
+
+# Merge the associated names with the top movies to include movie details
+associated_names_with_movies = associated_names_list.merge(
+    best_movies[['tconst', 'averagerating', 'numvotes', 'weighted_rating']],
+    left_on='known_for_titles',
+    right_on='tconst',
+    how='left'
+)
+
+# Print the column names of the DataFrame for debugging
+print("Columns in associated_names_with_movies DataFrame:")
+print(associated_names_with_movies.columns)
+
+# Display the final results with correct column names
+print("\nPrimary Names Associated with Top 10 Movies:")
+print(associated_names_with_movies[['primary_name', 'tconst', 'averagerating', 'numvotes', 'weighted_rating']])
+ 
+
+
