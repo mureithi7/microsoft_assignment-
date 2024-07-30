@@ -1,4 +1,4 @@
-1. Determine the movie with the highest revenue: 
+# determine the movie with the highest revenue: 
 
 import pandas as pd
 
