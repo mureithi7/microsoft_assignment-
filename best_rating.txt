@@ -1,4 +1,4 @@
-2. Determine movie with the best rating by calculating weighted average scores:
+# determine movie with the best rating by calculating weighted average scores:
 
 import pandas as pd
 
